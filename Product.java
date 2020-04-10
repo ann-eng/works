@@ -121,7 +121,7 @@ public class Product implements Comparable<Product>{
             case 6: return UnitOfMeasure.isCorrect(s);
             case 7: return manufacturer.checking(i - 7, s);
             case 8: return manufacturer.checking(i - 7, s);
-            case 9: return manufacturer.checking(i - 1, s);
+            case 9: return manufacturer.checking(i - 7, s);
             default: return false;
         }
     }
@@ -135,89 +135,43 @@ public class Product implements Comparable<Product>{
     }
 
     /**
-     * Устанавливает название объекта.
-     * @param answ  вводимое название
-     * */
-    public void setName(String answ) { this.name = answ.trim();}
-
-    /**
-     * Устанавливает координату X объекта.
-     * @param answ  строковое представление вводимой координаты
-     * */
-    public void setCoordinateX(String answ) { this.coordinates.setX(Long.decode(answ)); }
-
-    /**
-     * Устанавливает координату Y объекта.
-     * @param answ  строковое представление вводимой координаты
-     * */
-    public void setCoordinateY(String answ) { this.coordinates.setY(Integer.decode(answ)); }
-
-    /**
-     * Устанавливает стоимость объекта.
-     * @param answ  строковое представление вводимой стоимости
-     * */
-    public void setPrice(String answ) {
-        if (answ.equals("")) this.price = null;
-        else this.price = Long.decode(answ);
-    }
-
-    /**
-     * Устанавливает инвентарный номер объекта.
-     * @param answ  вводимый инвентарный номер
-     * */
-    public void setPartNumber(String answ) {
-        if (answ.equals("")) this.partNumber = null;
-        this.partNumber = answ;
-    }
-
-    /**
-     * Устанавливает цену производства объекта.
-     * @param answ  строковое представление вводимой цены
-     * */
-    public void setManufactureCost(String answ) { this.manufactureCost = Integer.decode(answ); }
-
-    /**
-     * Устанавливает единицы измерения объекта.
-     * @param answ  строковое представление вводимых единиц измерения
-     * */
-    public void setUnitOfMeasure(String answ) { this.unitOfMeasure = UnitOfMeasure.set(answ);  }
-
-    /**
      * Устанавливает одно из полей объекта.
      * @param i  номер поля
-     * @param s  строковое представление значения поля
+     * @param option  строковое представление значения поля
      * */
-    public void set(int i, String s){
+    public void set(int i, String option){
         switch (i){
             case 0:
-                this.setName(s);
+                this.name = option.trim();
                 break;
             case 1:
-                this.setCoordinateX(s);
+                this.coordinates.setX(Long.decode(option));
                 break;
             case 2:
-                this.setCoordinateY(s);
+                this.coordinates.setY(Integer.decode(option));
                 break;
             case 3:
-                this.setPrice(s);
+                if (option.equals("")) this.price = null;
+                else this.price = Long.decode(option);
                 break;
             case 4:
-                this.setPartNumber(s);
+                if (option.equals("")) this.partNumber = null;
+                else this.partNumber = option;
                 break;
             case 5:
-                this.setManufactureCost(s);
+                this.manufactureCost = Integer.decode(option);
                 break;
             case 6:
-                this.setUnitOfMeasure(s);
+                this.unitOfMeasure = UnitOfMeasure.set(option);
                 break;
             case 7:
-                this.manufacturer.setName(s);
+                this.manufacturer.set(0, option);
                 break;
             case 8:
-                this.manufacturer.setAnnualTurnover(s);
+                this.manufacturer.set(1, option);
                 break;
             case 9:
-                this.manufacturer.setType(s);
+                this.manufacturer.set(2, option);
             default:
                 //
                 break;
@@ -226,15 +180,16 @@ public class Product implements Comparable<Product>{
 
     /**
      * Заполняет все поля объекта.
+     * @param reader поток ввода информации об продукте
      * */
-    public void create(){
-        try(BufferedReader buf = new BufferedReader(new InputStreamReader(System.in))) {
+    public void create(BufferedReader reader){
+        try {
             String answ;
             for (int i = 0 ; i < 10; i++){
                 boolean check;
                 do {
                     getInfoAboutProduct(i);
-                    answ = buf.readLine().trim();
+                    answ = reader.readLine().trim();
                     check = this.checking(i, answ);
                     if (!check) System.out.println("Данные введены неверно. " + getHelp(i) + ".");
                 } while (!check);
@@ -258,7 +213,7 @@ public class Product implements Comparable<Product>{
                 "Единицы измерения вводятся в формате " + UnitOfMeasure.get().replaceAll("[()]",""),
                 "Название производителя не может быть пустой строкой и должно существовать",
                 "Годовой оборот производителя является положительным числом и вводится в числовом формате",
-                "Тип органмзации-производителя вводится в формате: " + OrganizationType.get().replaceAll("[()]", "")};
+                "Тип организации-производителя вводится в формате: " + OrganizationType.get().replaceAll("[()]", "")};
         return inf[i];
     }
 
@@ -300,5 +255,14 @@ public class Product implements Comparable<Product>{
         System.out.println("Стоимость изготовления: " +  this.manufactureCost);
         System.out.println("Единицы измерения: " + this.unitOfMeasure.name().toLowerCase());
         System.out.println("Производитель: " + this.manufacturer.getType().name() + " " + this.manufacturer.getName());
+    }
+
+    /**
+     * Заполняет поля продукта данными из файла.
+     * @param readFromFile считанные поля
+     * */
+    public void create(String[] readFromFile) throws UncorrectArgumentException{
+        for (int i =0; i < 10; i++) set(i, readFromFile[i]);
+        if (!checkAll()) throw new UncorrectArgumentException("Не все поля продукта заполнены");
     }
 }
