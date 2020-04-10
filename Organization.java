@@ -70,24 +70,6 @@ public class Organization implements Comparable<Organization>{
     }
 
     /**
-     * Устанавливает название производителя.
-     * @param s  название
-     * */
-    public void setName(String s) { this.name = s;}
-
-    /**
-     * Устанавливает годовой оборот производителя.
-     * @param s  значение годового оборота в строковои представлении
-     * */
-    public void setAnnualTurnover(String s) { this.annualTurnover = Long.decode(s);  }
-
-    /**
-     * Устанавливает тип организации.
-     * @param s  строковое представление типа организации
-     * */
-    public void setType(String s) { this.type = OrganizationType.set(s); }
-
-    /**
      * Устанавливает одно из полей объекта.
      * @param i  номер поля
      * @param s  строковое представление значения поля
@@ -95,13 +77,13 @@ public class Organization implements Comparable<Organization>{
     public void set(int i, String s){
         switch (i){
             case 0:
-                this.setName(s);
+                this.name = s;
                 break;
             case 1:
-                this.setAnnualTurnover(s);
+                this.annualTurnover = Long.decode(s);
                 break;
             case 2:
-                this.setType(s);
+                this.type = OrganizationType.set(s);
                 break;
             default:
                 //
@@ -113,15 +95,16 @@ public class Organization implements Comparable<Organization>{
 
     /**
      * Заполняет все поля объекта.
+     * @param reader поток ввода информации об продукте
      * */
-    public void create(){
-        try(BufferedReader buf = new BufferedReader(new InputStreamReader(System.in))) {
+    public void create(BufferedReader reader){
+        try {
             String answ;
             for (int i = 0 ; i < 3; i++){
                 boolean check;
                 do {
                     this.getInfoAboutOrganization(i);
-                    answ = buf.readLine().trim();
+                    answ = reader.readLine().trim();
                     check = checking(i, answ);
                 } while (!check);
                 this.set(i, answ);
@@ -170,6 +153,13 @@ public class Organization implements Comparable<Organization>{
         final String[] questions = {"имя элемента",  "годовой оборот", "тип " + OrganizationType.get()};
         System.out.print("Введите " + questions[i] + ": ");
     }
-
+    /**
+     * Заполняет поля продукта данными из файла.
+     * @param readFromFile считанные поля
+     * */
+    public void create(String[] readFromFile) throws UncorrectArgumentException{
+        for (int i =0; i < 3; i++) set(i, readFromFile[i]);
+        if (!checkAll()) throw new UncorrectArgumentException("Не все поля продукта заполнены");
+    }
 
 }
