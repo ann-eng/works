@@ -1,6 +1,6 @@
 package lab5;
 
-
+import java.io.*;
 import java.util.Scanner;
 
 public class Main {
@@ -15,24 +15,15 @@ public class Main {
                 allProducts.setProdcts(p);
             }
             System.out.println("Коллекция загружена.");
-        }catch (NullPointerException e){
+        }catch (NullPointerException | IndexOutOfBoundsException e){
             System.out.println("Файл с коллекцией не задан. Коллекция пустая.");
+            System.out.println("Чтобы задать коллекцию, при запуске передайте переменную окружения E.");
         }finally {
             System.out.println();
             System.out.println("Переход в интерактивный режим.");
-            System.out.println("Введите команду:");
-            Command command = new Command();
-            String task;
-            Scanner scanner = new Scanner(System.in);
-            while (!(task = scanner.nextLine()).matches("[ ]*exit[ ]*")){
-                try {
-                    command.execution(allProducts, task);
-                }catch (UknownCommandException | UncorrectArgumentException e){
-                    System.out.println(e.getMessage());
-                }
-            }
-            scanner.close();
+            System.out.print("Введите команду: ");
+            Command command = new Command(allProducts);
+            command.work();
         }
-
     }
 }
