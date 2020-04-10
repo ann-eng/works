@@ -62,22 +62,25 @@ public class Command implements CommandsList{
                 StringBuilder command = new StringBuilder();
                 int i;
                 int lineNumber = 0;
+                fileReader.mark(8192);
                 do {
                     i = fileReader.read();
-                    if (i != -1) {
-                        if (i == 10){
+                    if (i == 10 || i == -1) {
                             lineNumber++;
                             try {
                                 streamID = 1;
+                                fileReader.mark(8192);
                                 execution(command.toString());
                             }catch (UknownCommandException | UncorrectArgumentException e){
-                                System.out.println("Ошибка в строке " + lineNumber+ ".");
+                                System.out.println("Ошибка в строке " + lineNumber + ".");
                                 System.out.println( e.getMessage());
                             }
+                            fileReader.reset();
                             command.delete(0, command.length());
-                        }else if (i != 13) command.append((char) i);
-                    }
+                    }else if (i != 13) command.append((char) i);
                 } while(i != -1);
+                fileReader.close();
+                streamID = 0;
             } catch (FileNotFoundException e) {
                 System.out.println("Файл не найден.");
             } catch (SecurityException e) {
@@ -216,35 +219,36 @@ public class Command implements CommandsList{
             String s;
             do {
                 i = fileReader.read();
-                if (i != -1) {
-                    if (i == 10){
-                        if (item.toString().matches("[ ]*[Ии]мя продукта[ ]*:[ ]*\\w+[ ]*")){
-                            options[0] = item.toString().replaceFirst("[Ии]мя продукта[ ]*:", "").trim();
-                        }else if (item.toString().matches("[ ]*[Кк]оордината[ ]+[Xx][ ]*:\\d+[ ]*")){
-                            options[1] = item.toString().replaceAll("[Ккординат :]+", "");
-                        }else if (item.toString().matches("[ ]*[Кк]оордината[ ]+[Yy][ ]*:\\d+[ ]*")){
-                            options[2] = item.toString().replaceAll("[ :Ккординат]+", "");
-                        }else if (item.toString().matches("[ ]*[цЦ]ена[ ]*продукта[ ]*:[ ]*\\d*[ ]*")){
-                            options[3] = item.toString().replaceAll("[Цценапродукт: ]", "");
-                        }else if (item.toString().matches("[ ]*[Ии]нвентарный[ ]+номер[ ]*:[ ]*\\w*[ ]*")){
-                            s = item.toString().replaceFirst("[Ии]нвентарный[ ]+номер[ ]*:", "").trim();
+                if (i == -1 || i == 10) {
+                        if (item.toString().matches("[ ]*[Nn]ame[ ]+of[ ]+product[ ]*:[ ]*\\w+[ ]*")){
+                            options[0] = item.toString().replaceFirst("[ ]*[Nn]ame[ ]+of[ ]+product[ ]*:[ ]*", "").trim();
+                        }else if (item.toString().matches("[ ]*[cC]oordinate[ ]+[Xx][ ]*:[ ]*\\d+[ ]*")){
+                            options[1] = item.toString().replaceAll("[CcordinateXx :]+", "");
+                        }else if (item.toString().matches("[ ]*[cC]oordinate[ ]+[Yy][ ]*:[ ]*\\d+[ ]*")){
+                            options[2] = item.toString().replaceAll("[ :CcordinetaYy]+", "");
+                        }else if (item.toString().matches("[ ]*[pP]rice[ ]*:[ ]*\\d*[ ]*")){
+                            options[3] = item.toString().replaceAll("[Pprice: ]", "");
+                        }else if (item.toString().matches("[ ]*[pP]art[ ]+number[ ]*:[ ]*\\w*[ ]*")){
+                            s = item.toString().replaceFirst("[ ]*[pP]art[ ]+number[ ]*:", "").trim();
                             if (s.equals("") || s.length() > 15) options[4] = s;
-                        }else if (item.toString().matches("[ ]*[Сс]тоимость[ ]+изготовления[ ]*:[ ]*\\d+[ ]*")){
-                            options[5] = item.toString().replaceAll("[ :Сстоимьзгвленя]", "");
-                        }else if (item.toString().matches("[ ]*[Ее]диницы[ ]+измерения[ ]*:[ ]*\\w+[ ]*")){
-                           s = item.toString().replaceAll("[ :Еединцызмря]", "");
+                        }else if (item.toString().matches("[ ]*[mM]anufacture[ ]+cost[ ]*:[ ]*\\d+[ ]*")){
+                            options[5] = item.toString().replaceAll("[ :Mmanufctreos]", "");
+                        }else if (item.toString().matches("[ ]*[uU]nit[ ]+of[ ]+measure[ ]*:[ ]*\\w+[ ]*")){
+                           s = item.toString().replaceFirst("[ ]*[uU]nit[ ]+of[ ]+measure[ ]*:", "").trim();
                             if (UnitOfMeasure.isCorrect(s)) options[6] = s;
-                        }else if (item.toString().matches("[ ]*[Нн]азвание[ ]+производителя[ ]*:[ ]*\\w+[ ]*")){
-                            options[7] = item.toString().replaceFirst("[ ]*[Нн]азвание[ ]+производителя[ ]*:[ ]*", "").trim();
-                        }else if (item.toString().matches("[ ]*[Гг]одовой[ ]+оборот[ ]+производителя[ ]*:[ ]*\\d+[ ]*")){
-                            options[8] = item.toString().replaceAll("[: Ггодвйбртпизеля]+", "");
-                        }else if (item.toString().matches("[ ]*[Тт]ип[ ]+организации[ ]*:[ ]*\\w+[ ]*")){
-                            s = item.toString().replaceAll("[ :Ттипорганзц]+", "");
+                        }else if (item.toString().matches("[ ]*[Nn]ame[ ]+of[ ]+manufacturer[ ]*:[ ]*\\w+[ ]*")){
+                            options[7] = item.toString().replaceFirst("[ ]*[Nn]ame[ ]+of[ ]+manufacturer[ ]*:", "").trim();
+                        }else if (item.toString().matches("[ ]*[Aa]nnual[ ]+turnover[ ]*:[ ]*\\d+[ ]*")){
+                            options[8] = item.toString().replaceAll("[: Aanultrove]+", "");
+                        }else if (item.toString().matches("[ ]*[Tt]ype[ ]*:[ ]*\\w+[ ]*")){
+                            s = item.toString().replaceFirst("[ ]*[Tt]ype[ ]*:", "").trim();
                             if (OrganizationType.isCorrect(s)) options[9] = s;
-                        } else return options;
+                        } else{
+                            fileReader.mark(8192);
+                            return options;
+                        }
                         item.delete(0, item.length());
                     }else if (i != 13) item.append((char) i);
-                }
             } while(i != -1);
         } catch (FileNotFoundException e) {
             System.out.println("Файл не найден.");
@@ -253,6 +257,7 @@ public class Command implements CommandsList{
         } catch (IOException e) {
             System.out.println("Чтение не удалось.");
         }
+        fileReader.mark(8192);
         return options;
     }
     /**
@@ -267,19 +272,20 @@ public class Command implements CommandsList{
             String s;
             do {
                 i = fileReader.read();
-                if (i != -1) {
-                    if (i == 10){
-                        if (item.toString().matches("[ ]*[Нн]азвание[ ]+производителя[ ]*:[ ]*\\w+[ ]*")){
-                            options[0] = item.toString().replaceFirst("[ ]*[Нн]азвание[ ]+производителя[ ]*:[ ]*", "").trim();
-                        }else if (item.toString().matches("[ ]*[Гг]одовой[ ]+оборот[ ]+производителя[ ]*:[ ]*\\d+[ ]*")){
-                            options[1] = item.toString().replaceAll("[: Ггодвйбртпизеля]+", "");
-                        }else if (item.toString().matches("[ ]*[Тт]ип[ ]+организации[ ]*:[ ]*\\w+[ ]*")){
-                            s = item.toString().replaceAll("[ :Ттипорганзц]+", "");
-                            if (OrganizationType.isCorrect(s)) options[2] = s;
-                        } else return options;
+                if (i == -1 || i == 10) {
+                    if (item.toString().matches("[ ]*[Nn]ame[ ]+of[ ]+manufacturer[ ]*:[ ]*\\w+[ ]*")) {
+                        options[0] = item.toString().replaceFirst("[ ]*[Nn]ame[ ]+of[ ]+manufacturer[ ]*:", "").trim();
+                    } else if (item.toString().matches("[ ]*[Aa]nnual[ ]+turnover[ ]*:[ ]*\\d+[ ]*")) {
+                        options[1] = item.toString().replaceAll("[: Aanultrove]+", "");
+                    } else if (item.toString().matches("[ ]*[Tt]ype[ ]*:[ ]*\\w+[ ]*")) {
+                        s = item.toString().replaceFirst("[ ]*[Tt]ype[ ]*:", "").trim();
+                        if (OrganizationType.isCorrect(s)) options[2] = s;
+                    }   else {
+                            fileReader.mark(8192);
+                            return options;
+                        }
                         item.delete(0, item.length());
-                    }else if (i != 13) item.append((char) i);
-                }
+                    } else if (i != 13) item.append((char) i);
             } while(i != -1);
         } catch (FileNotFoundException e) {
             System.out.println("Файл не найден.");
@@ -288,6 +294,7 @@ public class Command implements CommandsList{
         } catch (IOException e) {
             System.out.println("Чтение не удалось.");
         }
+        fileReader.mark(8192);
         return options;
     }
 }
