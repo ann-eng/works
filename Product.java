@@ -114,7 +114,11 @@ public class Product implements Comparable<Product>{
         switch (i){
             case 0: return !s.equals("");
             case 1: return s.matches("-?\\d+");
-            case 2: return s.matches("-?\\d+") & Long.parseUnsignedLong(s) < 2147483647;
+            case 2:
+                if (s.matches("-?\\d+")){
+                    if (Long.parseUnsignedLong(s) < 2147483647) return true;
+                    else return false;
+                }else return false;
             case 3: return s.matches("\\d*");
             case 4: return  (s.length() > 15) || (s.length() ==0);
             case 5: return s.matches("\\d+");
@@ -142,36 +146,40 @@ public class Product implements Comparable<Product>{
     public void set(int i, String option){
         switch (i){
             case 0:
-                this.name = option.trim();
+                if (checking(0,option)) this.name = option.trim();
                 break;
             case 1:
-                this.coordinates.setX(Long.decode(option));
+                if (checking(1,option)) this.coordinates.setX(Long.decode(option));
                 break;
             case 2:
-                this.coordinates.setY(Integer.decode(option));
+                if (checking(2,option)) this.coordinates.setY(Integer.decode(option));
                 break;
             case 3:
-                if (option.equals("")) this.price = null;
-                else this.price = Long.decode(option);
+                if (checking(3,option)){
+                    if (option.equals("")) this.price = null;
+                    else  this.price = Long.decode(option);
+                }
                 break;
             case 4:
-                if (option.equals("")) this.partNumber = null;
-                else this.partNumber = option;
+                if (checking(4,option)){
+                    if (option.equals("")) this.partNumber = null;
+                    else  this.partNumber = option;
+                }
                 break;
             case 5:
-                this.manufactureCost = Integer.decode(option);
+                if (checking(5 ,option)) this.manufactureCost = Integer.decode(option);
                 break;
             case 6:
-                this.unitOfMeasure = UnitOfMeasure.set(option);
+                if (checking(6,option)) this.unitOfMeasure = UnitOfMeasure.set(option);
                 break;
             case 7:
-                this.manufacturer.set(0, option);
+                if (checking(7,option)) this.manufacturer.set(0, option);
                 break;
             case 8:
-                this.manufacturer.set(1, option);
+                if (checking(8,option)) this.manufacturer.set(1, option);
                 break;
             case 9:
-                this.manufacturer.set(2, option);
+                if (checking(9,option)) this.manufacturer.set(2, option);
             default:
                 //
                 break;
@@ -262,6 +270,9 @@ public class Product implements Comparable<Product>{
      * @param readFromFile считанные поля
      * */
     public void create(String[] readFromFile) throws UncorrectArgumentException{
+        for (int i =0; i < 10; i++) {
+            if (readFromFile[i] == null) readFromFile[i] = "";
+        }
         for (int i =0; i < 10; i++) set(i, readFromFile[i]);
         if (!checkAll()) throw new UncorrectArgumentException("Не все поля продукта заполнены");
     }
